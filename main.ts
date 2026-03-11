@@ -7,6 +7,7 @@ interface ViewTrackerSettings {
   trackedField: string;
   trackAllNotes: boolean;
   timezone: string;
+  use24HourFormat: boolean;
 }
 
 const DEFAULT_SETTINGS: ViewTrackerSettings = {
@@ -16,11 +17,13 @@ const DEFAULT_SETTINGS: ViewTrackerSettings = {
   trackedField: 'tracked',
   trackAllNotes: false,
   timezone: 'America/New_York',
+  use24HourFormat: false,
 };
 
 export default class ViewTrackerPlugin extends Plugin {
   settings: ViewTrackerSettings;
   private lastOpened: Map<string, number> = new Map();
+  private processing: Set<string> = new Set();
 
   async onload() {
     await this.loadSettings();
@@ -65,16 +68,25 @@ export default class ViewTrackerPlugin extends Plugin {
     const dedupMs = this.settings.dedupWindowSeconds * 1000;
 
     if (now - lastTime < dedupMs) return;
-    this.lastOpened.set(file.path, now);
+    if (this.processing.has(file.path)) return;
 
     const { viewsField, lastViewedField, trackedField, trackAllNotes } = this.settings;
 
-    await this.app.fileManager.processFrontMatter(file, (fm) => {
-      if (!trackAllNotes && !fm[trackedField]) return;
+    this.processing.add(file.path);
+    try {
+      await this.app.fileManager.processFrontMatter(file, (fm) => {
+        if (!trackAllNotes && !fm[trackedField]) return;
 
-      fm[viewsField] = (fm[viewsField] ?? 0) + 1;
-      fm[lastViewedField] = moment().tz(this.settings.timezone).format('MMM D, YYYY h:mm A z');
-    });
+        fm[viewsField] = (Number(fm[viewsField]) || 0) + 1;
+        const timeFmt = this.settings.use24HourFormat ? 'HH:mm' : 'h:mm A';
+        fm[lastViewedField] = moment().tz(this.settings.timezone).format(`MMM D, YYYY ${timeFmt} z`);
+      });
+      this.lastOpened.set(file.path, now);
+    } catch (e) {
+      console.error('View tracker: failed to update frontmatter', e);
+    } finally {
+      this.processing.delete(file.path);
+    }
   }
 
   async toggleTracking(file: TFile) {
@@ -175,6 +187,18 @@ class ViewTrackerSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.timezone)
           .onChange(async (value) => {
             this.plugin.settings.timezone = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName('Use 24-hour format')
+      .setDesc('Display timestamps in 24-hour format (e.g., 15:45) instead of 12-hour AM/PM format (e.g., 3:45 PM).')
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.use24HourFormat)
+          .onChange(async (value) => {
+            this.plugin.settings.use24HourFormat = value;
             await this.plugin.saveSettings();
           })
       );

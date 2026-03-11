@@ -46,3 +46,7 @@ See [CLAUDE.md](CLAUDE.md) for architecture notes and AI-assisted development gu
 ## Installation
 
 Copy `main.js` and `manifest.json` to your vault's `.obsidian/plugins/view-tracker/` directory, then enable the plugin in Obsidian settings.
+
+```bash
+cp main.js manifest.json "/Users/seannam/Library/Mobile Documents/iCloud~md~obsidian/Documents/iCloud Vault/.obsidian/plugins/view-tracker/"
+```
