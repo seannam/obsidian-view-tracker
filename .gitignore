@@ -1,0 +1,29 @@
+# Build output
+main.js
+*.js.map
+
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+._*
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.code-workspace
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Misc
+*.bak
+*.tmp
