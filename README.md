@@ -41,6 +41,8 @@ npm run dev    # development build with sourcemaps
 npm run build  # production build (minified)
 ```
 
+See [CLAUDE.md](CLAUDE.md) for architecture notes and AI-assisted development guidance.
+
 ## Installation
 
 Copy `main.js` and `manifest.json` to your vault's `.obsidian/plugins/view-tracker/` directory, then enable the plugin in Obsidian settings.
