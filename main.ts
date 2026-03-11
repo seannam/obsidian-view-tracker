@@ -6,6 +6,7 @@ interface ViewTrackerSettings {
   lastViewedField: string;
   trackedField: string;
   trackAllNotes: boolean;
+  timezone: string;
 }
 
 const DEFAULT_SETTINGS: ViewTrackerSettings = {
@@ -14,6 +15,7 @@ const DEFAULT_SETTINGS: ViewTrackerSettings = {
   lastViewedField: 'last-viewed',
   trackedField: 'tracked',
   trackAllNotes: false,
+  timezone: 'America/New_York',
 };
 
 export default class ViewTrackerPlugin extends Plugin {
@@ -71,7 +73,7 @@ export default class ViewTrackerPlugin extends Plugin {
       if (!trackAllNotes && !fm[trackedField]) return;
 
       fm[viewsField] = (fm[viewsField] ?? 0) + 1;
-      fm[lastViewedField] = moment().format('YYYY-MM-DDTHH:mm:ss');
+      fm[lastViewedField] = moment().tz(this.settings.timezone).format('MMM D, YYYY h:mm A z');
     });
   }
 
@@ -161,6 +163,18 @@ class ViewTrackerSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.trackedField)
           .onChange(async (value) => {
             this.plugin.settings.trackedField = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName('Timezone')
+      .setDesc('IANA timezone for the last-viewed timestamp (e.g. America/New_York, Europe/London, Asia/Tokyo).')
+      .addText((text) =>
+        text
+          .setValue(this.plugin.settings.timezone)
+          .onChange(async (value) => {
+            this.plugin.settings.timezone = value;
             await this.plugin.saveSettings();
           })
       );
