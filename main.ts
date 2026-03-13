@@ -31,7 +31,7 @@ export default class ViewTrackerPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => {
         if (file instanceof TFile && file.extension === 'md') {
-          this.trackView(file);
+          void this.trackView(file);
         }
       })
     );
@@ -43,7 +43,7 @@ export default class ViewTrackerPlugin extends Plugin {
         const file = this.app.workspace.getActiveFile();
         if (file && file.extension === 'md') {
           if (!checking) {
-            this.toggleTracking(file);
+            void this.toggleTracking(file);
           }
           return true;
         }
