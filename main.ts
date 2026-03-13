@@ -79,17 +79,14 @@ export default class ViewTrackerPlugin extends Plugin {
   }
 
   async trackView(file: TFile) {
-    console.log(`[ViewTracker] trackView called for ${file.path}`);
     const now = Date.now();
     const lastTime = this.lastOpened.get(file.path) ?? 0;
     const dedupMs = this.settings.dedupWindowSeconds * 1000;
 
     if (now - lastTime < dedupMs) {
-      console.log(`[ViewTracker] skipped: dedup window (${Math.ceil((dedupMs - (now - lastTime)) / 1000)}s remaining)`);
       return;
     }
     if (this.processing.has(file.path)) {
-      console.log(`[ViewTracker] skipped: already processing ${file.path}`);
       return;
     }
 
@@ -99,13 +96,11 @@ export default class ViewTrackerPlugin extends Plugin {
     try {
       await this.app.fileManager.processFrontMatter(file, (fm) => {
         if (!trackAllNotes && !fm[trackedField]) {
-          console.log(`[ViewTracker] skipped: note not tracked (trackAllNotes=${trackAllNotes}, ${trackedField}=${fm[trackedField]})`);
           return;
         }
 
         fm[viewsField] = (Number(fm[viewsField]) || 0) + 1;
         fm[lastViewedField] = this.formatTimestamp();
-        console.log(`[ViewTracker] updated ${file.path}: ${viewsField}=${fm[viewsField]}, ${lastViewedField}=${fm[lastViewedField]}`);
       });
       this.lastOpened.set(file.path, now);
     } catch (e) {
