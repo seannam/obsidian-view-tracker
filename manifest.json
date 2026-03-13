@@ -3,7 +3,7 @@
   "name": "View Tracker",
   "version": "1.0.0",
   "minAppVersion": "1.4.0",
-  "description": "Tracks note view counts and last-viewed dates via YAML frontmatter",
+  "description": "Tracks note view counts and last-viewed dates via YAML frontmatter.",
   "author": "Sean Nam",
   "authorUrl": "https://github.com/seannam",
   "isDesktopOnly": false
